@@ -8,10 +8,10 @@ import (
 	"ireul.com/web"
 )
 
-// DecodeWechatXML decode Wechat XML body
-func DecodeWechatXML() interface{} {
+// DecodeXMLFilter decode Wechat XML body
+func DecodeXMLFilter() interface{} {
 	return func(ctx *web.Context) {
-		m := types.Message{}
+		m := types.WxReq{}
 		bytes, err := ctx.Req.Body().Bytes()
 		if err != nil {
 			log.Println(err.Error())

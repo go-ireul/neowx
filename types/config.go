@@ -1,7 +1,5 @@
 package types
 
-import "ireul.com/com"
-
 // Config represents a config.yaml file
 type Config struct {
 	Env      string    `yaml:"env"`
@@ -9,7 +7,6 @@ type Config struct {
 	Port     int       `yaml:"port"`
 	RedisURL string    `yaml:"redis_url"`
 	Accounts []Account `yaml:"accounts"`
-	Rules    []Rule    `yaml:"rules"`
 }
 
 // Account represents a MP account
@@ -18,12 +15,28 @@ type Account struct {
 	AppID     string `yaml:"app_id"`
 	AppSecret string `yaml:"app_secret"`
 	OrignalID string `yaml:"orignal_id"`
+	Default   bool   `yaml:"default"`
 }
 
-// Rule represents a rule
-type Rule struct {
-	Match     com.Map `yaml:"match"`
-	Text      string  `yaml:"text"`
-	HTTPSync  string  `yaml:"http_sync"`
-	HTTPAsync string  `yaml:"http_async"`
+// AccountByName return a Account with name
+func (c Config) AccountByName(n string) Account {
+	for _, a := range c.Accounts {
+		if a.Name == n {
+			return a
+		}
+	}
+	return Account{}
+}
+
+// DefaultAccount return a default Account
+func (c Config) DefaultAccount() Account {
+	for _, a := range c.Accounts {
+		if a.Default {
+			return a
+		}
+	}
+	if len(c.Accounts) > 0 {
+		return c.Accounts[0]
+	}
+	return Account{}
 }
