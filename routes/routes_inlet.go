@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"time"
 
 	"ireul.com/com"
@@ -15,21 +14,27 @@ func InletGet(ctx *web.Context) {
 }
 
 // InletPost POST to /inlet
-func InletPost(ctx *web.Context, m types.WxReq, cfg types.Config, rs []types.Rule) {
-	for _, r := range rs {
-		if r.Fn == nil || r.Fn(m, cfg) {
-			if len(r.HTTPSync) > 0 {
-				//TODO: HTTPSync and return
-			} else if len(r.HTTPAsync) > 0 {
-				//TODO: go HTTPSync
+func InletPost(ctx *web.Context, m types.WxReq, cfg types.Config) {
+	for _, rule := range cfg.Rules {
+		ok, err := rule.Matches(m)
+		if err != nil {
+			ctx.Error(500, "failed to execute match: "+err.Error())
+			return
+		}
+		if ok {
+			if len(rule.HTTPSync) > 0 {
+				//TODO: http sync and return
 			}
-			if len(r.Text) > 0 {
+			if len(rule.HTTPAsync) > 0 {
+				//TODO: go http sync
+			}
+			if len(rule.Text) > 0 {
 				resp := types.WxTextResp{
-					ToUserName:   com.NewCDATA(m.FromUserName),
 					FromUserName: com.NewCDATA(m.ToUserName),
-					CreateTime:   fmt.Sprintf("%d", time.Now().Unix()),
+					ToUserName:   com.NewCDATA(m.FromUserName),
+					CreateTime:   com.ToStr(time.Now().Unix()),
 					MsgType:      com.NewCDATA(types.Text),
-					Content:      com.NewCDATA(r.Text),
+					Content:      com.NewCDATA(rule.Text),
 				}
 				ctx.XML(200, resp)
 			} else {

@@ -10,3 +10,10 @@ accounts:
     app_id: wx1234567890        # appId of account
     app_secret: abcdefghijklmn  # appSecret of account
     orignal_id: gh_xxxxxxx      # orignalId of account
+# rules
+rules:
+  - match:
+      ToUserId:
+    text: "hello world"
+    http_sync: "http://example.com/handle"
+    http_async: "http://example.com/handle"

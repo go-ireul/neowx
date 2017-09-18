@@ -11,10 +11,10 @@ type WxReq struct {
 	// Basic Fields, not empty
 	ToUserName   string
 	FromUserName string
-	CreateTime   string
+	CreateTime   int64
 	MsgType      string
 	// WxReq
-	MsgID string `xml:"MsgId" json:"MsgId,omitempty"`
+	MsgID int64 `xml:"MsgId" json:"MsgId,omitempty"`
 	// TextWxReq
 	Content string `json:",omitempty"`
 	// RichWxReq

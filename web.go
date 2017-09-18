@@ -11,9 +11,6 @@ import (
 	"ireul.com/yaml"
 )
 
-// Rules all rules
-var rules = []types.Rule{}
-
 // webCommand 用来启动 Web 服务
 var webCommand = cli.Command{
 	Name:   "web",
@@ -42,7 +39,6 @@ func execWebCommand(c *cli.Context) (err error) {
 	w.Use(web.Static("public"))
 	w.Use(web.Renderer())
 	w.Map(cfg)
-	w.Map(rules)
 	// mount
 	routes.Mount(w)
 	// run web instance
