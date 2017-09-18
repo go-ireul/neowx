@@ -6,7 +6,9 @@ import (
 
 	"ireul.com/cli"
 	"ireul.com/neowx/routes"
+	"ireul.com/neowx/store"
 	"ireul.com/neowx/types"
+	"ireul.com/redis"
 	"ireul.com/web"
 	"ireul.com/yaml"
 )
@@ -32,7 +34,14 @@ func execWebCommand(c *cli.Context) (err error) {
 		log.Fatal(err)
 		return
 	}
-	log.Printf("%v\n", cfg)
+	// create redis
+	opts, err := redis.ParseURL(cfg.RedisURL)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	rds := redis.NewClient(opts)
+	sto := store.NewStore(rds)
 	// build web.Web
 	w := web.New()
 	w.Use(web.Logger())
@@ -40,6 +49,8 @@ func execWebCommand(c *cli.Context) (err error) {
 	w.Use(web.Static("public"))
 	w.Use(web.Renderer())
 	w.Map(cfg)
+	w.Map(rds)
+	w.Map(sto)
 	// mount
 	routes.Mount(w)
 	// run web instance

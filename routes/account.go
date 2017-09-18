@@ -11,8 +11,11 @@ func AccountFilter(k string) interface{} {
 		name := ctx.Params(":name")
 		a := cfg.AccountByName(name)
 		if len(a.Name) == 0 {
-			ctx.Error(404, "account not found: "+name)
-			return
+			a = cfg.DefaultAccount()
+			if len(a.Name) == 0 {
+				ctx.Error(400, "Wechat MP account not found: "+name)
+				return
+			}
 		}
 		ctx.Map(a)
 	}
