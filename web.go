@@ -19,6 +19,7 @@ var webCommand = cli.Command{
 }
 
 func execWebCommand(c *cli.Context) (err error) {
+	log.SetPrefix("[neowx-web] ")
 	// decode Config
 	bytes, err := ioutil.ReadFile(c.GlobalString("config"))
 	if err != nil {

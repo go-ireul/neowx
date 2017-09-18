@@ -1,6 +1,10 @@
 package routes
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"time"
 
 	"ireul.com/com"
@@ -16,18 +20,38 @@ func InletGet(ctx *web.Context) {
 // InletPost POST to /inlet
 func InletPost(ctx *web.Context, m types.WxReq, cfg types.Config) {
 	for _, rule := range cfg.Rules {
+		// match
 		ok, err := rule.Matches(m)
+		// if failed to execute match, basically regexp is wrongly written, mute and return
 		if err != nil {
-			ctx.Error(500, "failed to execute match: "+err.Error())
+			fmt.Printf("--- Failed to execute match:\n%s\n%v\n--- \n", err.Error(), m)
+			ctx.PlainText(200, []byte("success"))
 			return
 		}
+		// if matched
 		if ok {
+			// if HTTPSync, make request, pipe and return
 			if len(rule.HTTPSync) > 0 {
-				//TODO: http sync and return
+				// execute POST with WxReq marshalled as JSON
+				resp, err := relayWxReq(rule.HTTPSync, m)
+				// if failed, mute
+				if err != nil {
+					fmt.Printf("--- Failed to POST HTTPSync to %s\n%s\n--- \n", rule.HTTPSync, err.Error())
+					ctx.PlainText(200, []byte("success"))
+					return
+				}
+				// pipe and return
+				if err = com.HTTPPipeResponse(ctx.Resp, resp); err != nil {
+					fmt.Printf("--- Failed to pipe HTTPSync to %s\n%s\n--- \n", rule.HTTPSync, err.Error())
+				}
+				return
 			}
+
+			// if HTTPAsync, go async request
 			if len(rule.HTTPAsync) > 0 {
-				//TODO: go http sync
+				go relayWxReq(rule.HTTPAsync, m)
 			}
+			// write text or mute
 			if len(rule.Text) > 0 {
 				resp := types.WxTextResp{
 					FromUserName: com.NewCDATA(m.ToUserName),
@@ -40,8 +64,23 @@ func InletPost(ctx *web.Context, m types.WxReq, cfg types.Config) {
 			} else {
 				ctx.PlainText(200, []byte("success"))
 			}
+
 			return
 		}
+		// continue to next rule
 	}
+
+	// if no rule matches found, mute
 	ctx.PlainText(200, []byte("success"))
+}
+
+func relayWxReq(url string, m types.WxReq) (*http.Response, error) {
+	// marshal to json
+	b, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	rdr := bytes.NewReader(b)
+	// post as application/json
+	return http.Post(url, "application/json", rdr)
 }
