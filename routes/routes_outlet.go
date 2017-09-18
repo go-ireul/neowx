@@ -19,24 +19,24 @@ var OutletWhiteList = regexp.MustCompile(`\Ahttp(s)?:\/\/(\w+\.)?api\.weixin\.qq
 // OutletAction GET/POST to /outlet/:name
 func OutletAction(ctx *web.Context, a types.Account, sto *store.Store) {
 	// extract url
-	url, err := url.QueryUnescape(ctx.Req.URL.RawQuery)
+	ul, err := url.QueryUnescape(ctx.Req.URL.RawQuery)
 	if err != nil {
 		ctx.Error(400, "url is malformatted: "+err.Error())
 		return
 	}
 	// check whitelist
-	if !OutletWhiteList.MatchString(url) {
+	if !OutletWhiteList.MatchString(ul) {
 		ctx.Error(400, "url is not permitted, make sure it's a Wechat API url")
 		return
 	}
 	// fill AccessToken
-	if strings.Contains(url, AccessTokenPlaceholder) {
+	if strings.Contains(ul, AccessTokenPlaceholder) {
 		at, err := sto.GetAccessToken(a.AppID)
 		if err != nil {
 			ctx.Error(500, "failed to fetch access_token")
 			return
 		}
-		url = strings.Replace(url, AccessTokenPlaceholder, at, -1)
+		ul = strings.Replace(ul, AccessTokenPlaceholder, at, -1)
 	}
 	ctx.PlainText(200, []byte(a.AppID))
 }

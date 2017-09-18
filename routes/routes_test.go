@@ -27,3 +27,28 @@ func TestOutletWhiteList(t *testing.T) {
 		}
 	}
 }
+
+func TestOAuthWhiteList(t *testing.T) {
+	urls := []string{
+		"http://h5.pagoda.com.cn/dfafa",
+		"https://xx.h5.pagoda.com.cn/dfasfas",
+		"https://si.b.c.hqc.pagoda.com.cn/dasfdas",
+	}
+	for _, url := range urls {
+		if !OAuthWhiteList.MatchString(url) {
+			t.Error("failed to allow url: " + url)
+		}
+	}
+
+	urls = []string{
+		"internal://api.weixin.qq.com/dfafa",
+		"https://pagoda.com.cn.some.com/dfasfas",
+		"https://pagoda.com/dasfdas",
+		"http://weixin.qq.com.pagoda.com/somepath/somewhere",
+	}
+	for _, url := range urls {
+		if OAuthWhiteList.MatchString(url) {
+			t.Error("failed to deny url: " + url)
+		}
+	}
+}
