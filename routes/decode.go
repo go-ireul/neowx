@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/xml"
+	"log"
 
 	"ireul.com/neowx/types"
 	"ireul.com/web"
@@ -13,10 +14,16 @@ func DecodeWechatXML() interface{} {
 		m := types.Message{}
 		bytes, err := ctx.Req.Body().Bytes()
 		if err != nil {
-			ctx.Error(400, "cannot read POST body")
+			log.Println(err.Error())
+			ctx.Error(400, "Cannot read request body: "+err.Error())
 			return
 		}
-		xml.Unmarshal(bytes, &m)
+		err = xml.Unmarshal(bytes, &m)
+		if err != nil {
+			log.Println(err.Error())
+			ctx.Error(400, "Cannot unmarshal XML: "+err.Error())
+			return
+		}
 		ctx.Map(m)
 	}
 }
