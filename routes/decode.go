@@ -15,13 +15,13 @@ func DecodeWechatXML() interface{} {
 		bytes, err := ctx.Req.Body().Bytes()
 		if err != nil {
 			log.Println(err.Error())
-			ctx.Error(400, "cannot read POST body: "+err.Error())
+			ctx.Error(400, "Cannot read request body: "+err.Error())
 			return
 		}
 		err = xml.Unmarshal(bytes, &m)
 		if err != nil {
 			log.Println(err.Error())
-			ctx.Error(400, "cannot unmarshal XML: "+err.Error())
+			ctx.Error(400, "Cannot unmarshal XML: "+err.Error())
 			return
 		}
 		ctx.Map(m)
