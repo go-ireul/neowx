@@ -1,7 +1,10 @@
 package types
 
+import "encoding/xml"
+
 // Message incomming message from wechat server
 type Message struct {
+	XMLName xml.Name `xml:"xml"`
 	// Basic Fields, not empty
 	ToUserName   string `xml:",cdata"`
 	FromUserName string `xml:",cdata"`
