@@ -1,7 +1,11 @@
 # env
 env: development
+url: "http://example.com"
 host: "127.0.0.1"
 port: 8857
+oauth_domains:
+  - "example.com"
+  - "localhost"
 # redis url
 redis_url: redis://127.0.0.1:6379
 # wechat mp accounts

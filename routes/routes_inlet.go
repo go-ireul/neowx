@@ -9,6 +9,7 @@ import (
 
 	"ireul.com/com"
 	"ireul.com/neowx/types"
+	"ireul.com/neowx/wx"
 	"ireul.com/web"
 )
 
@@ -18,7 +19,7 @@ func InletGet(ctx *web.Context) {
 }
 
 // InletPost POST to /inlet
-func InletPost(ctx *web.Context, m types.WxReq, cfg types.Config) {
+func InletPost(ctx *web.Context, m wx.Message, cfg types.Config) {
 	for _, rule := range cfg.Rules {
 		// match
 		ok, err := rule.Matches(m)
@@ -32,8 +33,8 @@ func InletPost(ctx *web.Context, m types.WxReq, cfg types.Config) {
 		if ok {
 			// if HTTPSync, make request, pipe and return
 			if len(rule.HTTPSync) > 0 {
-				// execute POST with WxReq marshalled as JSON
-				resp, err := relayWxReq(rule.HTTPSync, m)
+				// execute POST with Message marshalled as JSON
+				resp, err := relayMessage(rule.HTTPSync, m)
 				// if failed, mute
 				if err != nil {
 					fmt.Printf("--- Failed to POST HTTPSync to %s\n%s\n--- \n", rule.HTTPSync, err.Error())
@@ -49,15 +50,15 @@ func InletPost(ctx *web.Context, m types.WxReq, cfg types.Config) {
 
 			// if HTTPAsync, go async request
 			if len(rule.HTTPAsync) > 0 {
-				go relayWxReq(rule.HTTPAsync, m)
+				go relayMessage(rule.HTTPAsync, m)
 			}
 			// write text or mute
 			if len(rule.Text) > 0 {
-				resp := types.WxTextResp{
+				resp := wx.TextReply{
 					FromUserName: com.NewCDATA(m.ToUserName),
 					ToUserName:   com.NewCDATA(m.FromUserName),
 					CreateTime:   com.ToStr(time.Now().Unix()),
-					MsgType:      com.NewCDATA(types.Text),
+					MsgType:      com.NewCDATA(wx.Text),
 					Content:      com.NewCDATA(rule.Text),
 				}
 				ctx.XML(200, resp)
@@ -74,7 +75,7 @@ func InletPost(ctx *web.Context, m types.WxReq, cfg types.Config) {
 	ctx.PlainText(200, []byte("success"))
 }
 
-func relayWxReq(url string, m types.WxReq) (*http.Response, error) {
+func relayMessage(url string, m wx.Message) (*http.Response, error) {
 	// marshal to json
 	b, err := json.Marshal(m)
 	if err != nil {

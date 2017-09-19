@@ -15,6 +15,7 @@ type Store struct {
 const (
 	AccessTokenPrefix = "access_token."
 	JSTicketPrefix    = "js_ticket."
+	OAuthURLPrefix    = "oauth_url."
 )
 
 // NewStore create a store

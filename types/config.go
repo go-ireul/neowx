@@ -10,12 +10,14 @@ import (
 
 // Config represents a config.yaml file
 type Config struct {
-	Env      string    `yaml:"env"`
-	Host     string    `yaml:"host"`
-	Port     int       `yaml:"port"`
-	RedisURL string    `yaml:"redis_url"`
-	Accounts []Account `yaml:"accounts"`
-	Rules    []Rule    `yaml:"rules"`
+	Env          string    `yaml:"env"`
+	URL          string    `yaml:"url"`
+	Host         string    `yaml:"host"`
+	Port         int       `yaml:"port"`
+	RedisURL     string    `yaml:"redis_url"`
+	OAuthDomains []string  `yaml:"oauth_domains"`
+	Accounts     []Account `yaml:"accounts"`
+	Rules        []Rule    `yaml:"rules"`
 }
 
 // Account represents a MP account
@@ -35,8 +37,8 @@ type Rule struct {
 	HTTPAsync string            `yaml:"http_async"`
 }
 
-// Matches match a rule against a WxReq
-func (r Rule) Matches(req WxReq) (bool, error) {
+// Matches match a rule against a struct
+func (r Rule) Matches(req interface{}) (bool, error) {
 	if len(r.Match) > 0 {
 		m := structs.Map(req)
 		for k, v := range r.Match {
