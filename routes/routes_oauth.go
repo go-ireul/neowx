@@ -3,7 +3,7 @@ package routes
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
+	"log"
 	"net/url"
 	"strings"
 
@@ -67,8 +67,8 @@ func OAuthCallbackAction(ctx *web.Context, a types.Account, sto *store.Store, cf
 		ctx.Error(400, "failed to get user token: "+err.Error())
 		return
 	}
-	fmt.Println(link)
-	fmt.Println(resp.OpenID)
+	log.Println(link)
+	log.Println(resp.OpenID)
 	ctx.PlainText(200, []byte("hello"))
 }
 

@@ -3,7 +3,7 @@ package routes
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -25,7 +25,7 @@ func InletPost(ctx *web.Context, m wx.Message, cfg types.Config) {
 		ok, err := rule.Matches(m)
 		// if failed to execute match, basically regexp is wrongly written, mute and return
 		if err != nil {
-			fmt.Printf("--- Failed to execute match:\n%s\n%v\n--- \n", err.Error(), m)
+			log.Printf("--- Failed to execute match:\n%s\n%v\n--- \n", err.Error(), m)
 			ctx.PlainText(200, []byte("success"))
 			return
 		}
@@ -37,13 +37,13 @@ func InletPost(ctx *web.Context, m wx.Message, cfg types.Config) {
 				resp, err := relayMessage(rule.HTTPSync, m)
 				// if failed, mute
 				if err != nil {
-					fmt.Printf("--- Failed to POST HTTPSync to %s\n%s\n--- \n", rule.HTTPSync, err.Error())
+					log.Printf("--- Failed to POST HTTPSync to %s\n%s\n--- \n", rule.HTTPSync, err.Error())
 					ctx.PlainText(200, []byte("success"))
 					return
 				}
 				// pipe and return
 				if err = com.HTTPPipeResponse(ctx.Resp, resp); err != nil {
-					fmt.Printf("--- Failed to pipe HTTPSync to %s\n%s\n--- \n", rule.HTTPSync, err.Error())
+					log.Printf("--- Failed to pipe HTTPSync to %s\n%s\n--- \n", rule.HTTPSync, err.Error())
 				}
 				return
 			}
